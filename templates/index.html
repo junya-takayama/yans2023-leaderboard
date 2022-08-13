@@ -134,7 +134,9 @@
                 <th style="width: 200px;">#</th>
                 <th style="width: 300px;">チーム</th>
                 <th style="padding-right: 20px;">提出回数</th>
-                <th style="padding-right: 20px;">nDCG</th>
+                {% for var_name, metric_name in metrics_name_dict.items() %}
+                  <th style="padding-right: 20px;">{{ metric_name }}</th>
+                {% endfor %}
               </tr>
             </thead>
             <tbody>
@@ -155,11 +157,11 @@
                   <td>
                     {{ row.n_submit }}
                   </td>
-                  {% for elem in ['ndcg'] %}
-                    {% if elem == 'ndcg' and rank == 1 %}
-                      <td><span style="font-weight: bolder;">{{ row[elem]|round(3) }}</span></td>
+                  {% for var_name, metric_name in metrics_name_dict.items() %}
+                    {% if var_name == sort_key and rank == 1 %}
+                      <td><span style="font-weight: bolder;">{{ row[var_name]|round(3) }}</span></td>
                     {% else %}
-                      <td>{{ row[elem]|round(3) }}</td>
+                      <td>{{ row[var_name]|round(3) }}</td>
                     {% endif %}
                   {% endfor %}
                 </tr>
@@ -171,7 +173,7 @@
     </div>
     <div class="row" style="position: absolute; bottom: 0; width: 100%;">
       <div class="col s12 l4 offset-l4 center">
-        <img src="/static/logo.jpg" height=30px></img> <span class="blue-grey-text"><a class="blue-grey-text" href="https://yans.anlp.jp/entry/yans2022">NLP若手の会</a></span>
+        <a href="https://yans.anlp.jp/entry/yans2022"><img src="/static/logo.jpg" height=30px></img></a> <span class="blue-grey-text"><a class="blue-grey-text" href="https://yans.anlp.jp/entry/yans2022">NLP若手の会</a></span>
       </div>
     </div>
   </div>
