@@ -209,7 +209,7 @@ def upload_and_evaluate():
     submission_data = upload_form.submission_file.data
 
     try:
-        df_true = pd.read_json("./data/leader_board.jsonl", orient="records", lines=True)
+        df_true = pd.read_json(os.path.join(base_dir + "/data/leader_board.jsonl"), orient="records", lines=True)
     except:
         flash("正解データの読み込みに失敗しました。お手数ですが運営委員までご連絡ください。", "failed")
         return redirect(url_for('index'))
@@ -225,7 +225,7 @@ def upload_and_evaluate():
         }
         score_record = Score(result)
     except:
-        flash("評価スクリプトが以上終了しました。提出ファイルのフォーマット等を見直してください。", "failed")
+        flash("評価スクリプトが異常終了しました。提出ファイルのフォーマット等を見直してください。", "failed")
         return redirect(url_for('index'))
 
     try:
