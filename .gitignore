@@ -132,4 +132,4 @@ migrations/
 
 local_settings.py
 .DS_Store
-data/db.sqlite3
+db.sqlite3
