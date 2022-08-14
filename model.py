@@ -54,12 +54,10 @@ class Score(db.Model):
 
     # 複数の評価指標を表示したい場合以下に適宜追加
     ndcg = db.Column(db.Float, nullable=False)
-    f1 = db.Column(db.Float, nullable=False)
 
     # 各評価指標の変数名と表示名のマッピング。
     metrics_name_dict = {
         "ndcg": "nDCG@5",
-        "f1": "F値"
     }
 
     # ソートに用いる（最終評価に用いる）評価指標を変数名で指定
@@ -70,4 +68,5 @@ class Score(db.Model):
         self.comment = result_dict['comment']
 
         for var_name in self.metrics_name_dict.keys():
-            self.__dict__[var_name] = result_dict['var_name']
+            self.__dict__[var_name] = result_dict[var_name]
+
