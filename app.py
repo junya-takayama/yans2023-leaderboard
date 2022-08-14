@@ -114,11 +114,11 @@ def index():
     sort_key = Score.sort_key
     columns = ['print_name', 'created_at', 'comment'] + list(metrics_name_dict.keys()) + ['n_submit']
     ascending = False
-    sql_text = "select {} from scores as s".format(', '.join(columns)) \
+    sql_text = f"select {', '.join(columns)} from scores as s" \
         + " inner join users on s.user_primary_key = users.id " \
         + " where not exists (select 1 from scores as t where s.user_primary_key" \
         + " = t.user_primary_key and s.created_at < t.created_at )" \
-        + " order by {} {}".format(sort_key, 'ASC' if ascending else 'DESC')
+        + f" order by {sort_key} {'ASC' if ascending else 'DESC'}"
     results = db.session.execute(sql_text)
     score_table = list(map(dict, results.fetchall()))
 
@@ -130,8 +130,9 @@ def index():
 @app.route('/history', methods=['GET'])
 def visualize():
     sort_key = Score.sort_key
-    columns = ['print_name', 'created_at', 'comment', sort_key]
-    sql_text = "select {} from scores as s".format(', '.join(columns)) \
+    focus_id = request.args.get("id")
+    columns = ['users.user_id', 'print_name', 'created_at', 'comment', sort_key]
+    sql_text = f"select {', '.join(columns)} from scores as s" \
         + " inner join users on s.user_primary_key = users.id " \
         + " order by created_at DESC"
     results = db.session.execute(sql_text)
@@ -140,13 +141,16 @@ def visualize():
     for group_name, df in df_all.groupby("print_name"):
         if group_name == "YANSハッカソン運営委員":
             for _, row in df.iterrows():
-                fig.add_hline(y=row[sort_key], annotation_text=row.comment, line=dict(
-                    width=1, dash="dot"), annotation_position="bottom left")
+                fig.add_hline(
+                    y=row[sort_key], annotation_text=row.comment,
+                    line=dict(width=1, dash="dot"), annotation_position="bottom left"
+                )
         else:
+            print(df["user_id"])
             fig.add_scatter(
                 x=df.created_at.values, y=df[sort_key].values,
                 text=df.comment,
-                # visible='legendonly',
+                visible=True if (focus_id is None) or (df["user_id"].iloc[0] == focus_id) else 'legendonly',
                 name=group_name, mode="lines+markers",
                 line=dict(
                     width=1,
@@ -172,6 +176,7 @@ def upload_and_evaluate():
         df_pred = pd.read_json(submission_data, orient="records", lines=True)
         df_true = df_true[df_true["sets"] == "leader_board-private"]
         df_true = convert_to_submit_format(df_true, "helpful_votes", "true")
+        print(calc_ndcg(df_true, df_pred))
         result = {
             "ndcg": calc_ndcg(df_true, df_pred)["ndcg@5"],
             "user_primary_key": current_user.id,
