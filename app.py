@@ -1,20 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user
+from flask_login import LoginManager, login_user, current_user, logout_user
 from forms import LoginForm, UploadForm
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_admin import Admin, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
-from sqlalchemy.sql.functions import current_timestamp
-from sqlalchemy import event
 from pytz import timezone
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 from dateutil import parser
 import plotly.graph_objects as go
 import plotly
 import json
 import os
 import pandas as pd
+from model import db, Score, User
 from calc_score import calc_ndcg, convert_to_submit_format
 
 try:
@@ -35,8 +33,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{host}/{name}'.format(**{
     'name': 'db.sqlite3'
 })
 # app.config['FLASK_ADMIN_SWATCH'] = 'United'
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
+
+with app.app_context():
+    db.create_all()
 
 
 def utc_to_jst(timestring):
@@ -48,55 +49,6 @@ def utc_to_jst(timestring):
 
 
 app.jinja_env.filters['utc_to_jst'] = utc_to_jst
-
-
-class User(UserMixin, db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(256), unique=True,
-                        nullable=False)
-    print_name = db.Column(db.String(256), unique=False, nullable=False)
-    password = db.Column(db.String(256), unique=False, nullable=False)
-    is_admin = db.Column(db.Boolean, nullable=False)
-    n_submit = db.Column(db.Integer, default=0)
-    scores = db.relationship("Score", backref="users")
-
-    def __init__(self, user_id, password, print_name, is_admin=False):
-        self.user_id = user_id
-        self.password = password
-        self.print_name = print_name
-        self.is_admin = is_admin
-
-    def __repr__(self):
-        return self.user_id
-
-    def get_id(self):
-        return (self.user_id)
-
-
-class Score(db.Model):
-    __tablename__ = "scores"
-    id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.TIMESTAMP, server_default=current_timestamp())
-    user_primary_key = db.Column(db.Integer, db.ForeignKey('users.id'))
-    comment = db.Column(db.String(256), unique=False, nullable=True)
-    ndcg = db.Column(db.Float, nullable=False)
-    user = db.relationship("User")
-
-    def __init__(self, result_dict):
-        self.user_primary_key = result_dict['user_primary_key']
-        self.comment = result_dict['comment']
-        self.ndcg = result_dict['ndcg']
-
-
-db.create_all()
-
-
-@event.listens_for(User.password, 'set', retval=True)
-def hash_user_password(target, value, oldvalue, initiator):
-    if value != oldvalue:
-        return generate_password_hash(value)
-    return value
 
 
 class ScoreView(ModelView):
@@ -158,8 +110,9 @@ def logout():
 def index():
     login_form = LoginForm()
     upload_form = UploadForm()
-    columns = ['print_name', 'created_at', 'comment', 'ndcg', 'n_submit']
-    sort_key = 'ndcg'
+    metrics_name_dict = Score.metrics_name_dict
+    sort_key = Score.sort_key
+    columns = ['print_name', 'created_at', 'comment'] + list(metrics_name_dict.keys()) + ['n_submit']
     ascending = False
     sql_text = "select {} from scores as s".format(', '.join(columns)) \
         + " inner join users on s.user_primary_key = users.id " \
@@ -171,12 +124,13 @@ def index():
 
     return render_template(
         './index.html', login_form=login_form, upload_form=upload_form,
-        current_user=current_user, score_table=score_table)
+        current_user=current_user, score_table=score_table, sort_key=sort_key, metrics_name_dict=metrics_name_dict)
 
 
 @app.route('/history', methods=['GET'])
 def visualize():
-    columns = ['print_name', 'created_at', 'comment', 'ndcg']
+    sort_key = Score.sort_key
+    columns = ['print_name', 'created_at', 'comment', sort_key]
     sql_text = "select {} from scores as s".format(', '.join(columns)) \
         + " inner join users on s.user_primary_key = users.id " \
         + " order by created_at DESC"
@@ -186,11 +140,11 @@ def visualize():
     for group_name, df in df_all.groupby("print_name"):
         if group_name == "YANSハッカソン運営委員":
             for _, row in df.iterrows():
-                fig.add_hline(y=row["ndcg"], annotation_text=row.comment, line=dict(
+                fig.add_hline(y=row[sort_key], annotation_text=row.comment, line=dict(
                     width=1, dash="dot"), annotation_position="bottom left")
         else:
             fig.add_scatter(
-                x=df.created_at.values, y=df.ndcg.values,
+                x=df.created_at.values, y=df[sort_key].values,
                 text=df.comment,
                 # visible='legendonly',
                 name=group_name, mode="lines+markers",
