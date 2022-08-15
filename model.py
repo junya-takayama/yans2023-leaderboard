@@ -1,12 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_admin import Admin, expose, AdminIndexView
-from flask_admin.contrib.sqla import ModelView
-from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user
+from flask_login import UserMixin
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import event
-from pytz import timezone
-from dateutil import parser
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
