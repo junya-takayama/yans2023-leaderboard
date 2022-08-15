@@ -140,11 +140,11 @@ def visualize():
     fig = go.Figure(layout_yaxis_range=[0, 1])
     for group_name, df in df_all.groupby("print_name"):
         if group_name == "YANSハッカソン運営委員":
-            for _, row in df.iterrows():
-                fig.add_hline(
-                    y=row[sort_key], annotation_text=row.comment,
-                    line=dict(width=1, dash="dot"), annotation_position="bottom left"
-                )
+            row = df.iloc[0]
+            fig.add_hline(
+                y=row[sort_key], annotation_text=row.comment,
+                line=dict(width=1, dash="dot"), annotation_position="bottom left"
+            )
         else:
             fig.add_scatter(
                 x=df.created_at.values, y=df[sort_key].values,
