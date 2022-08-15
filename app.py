@@ -112,7 +112,7 @@ def index():
     upload_form = UploadForm()
     metrics_name_dict = Score.metrics_name_dict
     sort_key = Score.sort_key
-    columns = ['print_name', 'created_at', 'comment'] + list(metrics_name_dict.keys()) + ['n_submit']
+    columns = ['users.user_id', 'print_name', 'created_at', 'comment'] + list(metrics_name_dict.keys()) + ['n_submit']
     ascending = False
     sql_text = f"select {', '.join(columns)} from scores as s" \
         + " inner join users on s.user_primary_key = users.id " \
@@ -146,7 +146,6 @@ def visualize():
                     line=dict(width=1, dash="dot"), annotation_position="bottom left"
                 )
         else:
-            print(df["user_id"])
             fig.add_scatter(
                 x=df.created_at.values, y=df[sort_key].values,
                 text=df.comment,

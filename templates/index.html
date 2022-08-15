@@ -6,8 +6,10 @@
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lity/2.4.1/lity.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.0/js/jquery.tablesorter.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lity/2.4.1/lity.min.css" rel="stylesheet">
     <style type="text/css">
       .scroll-table {
           overflow-x: auto;
@@ -151,7 +153,9 @@
                     </span>
                   </td>
                   <td>
-                    <span style="font-weight: bolder;">{{ row.print_name }}</span>
+                    <span style="font-weight: bolder;">
+                      <a href="{{ url_for('visualize') }}?id={{ row.user_id }}" data-lity>{{ row.print_name }}</a>
+                    </span>
                     <br>{{ row.comment }}
                   </td>
                   <td>
