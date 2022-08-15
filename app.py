@@ -115,10 +115,10 @@ def index():
     columns = ['users.user_id', 'print_name', 'created_at', 'comment'] + list(metrics_name_dict.keys()) + ['n_submit']
     ascending = False
     sql_text = f"select {', '.join(columns)} from scores as s" \
-        + " inner join users on s.user_primary_key = users.id " \
-        + " where not exists (select 1 from scores as t where s.user_primary_key" \
-        + " = t.user_primary_key and s.created_at < t.created_at )" \
-        + f" order by {sort_key} {'ASC' if ascending else 'DESC'}"
+               + " inner join users on s.user_primary_key = users.id " \
+               + " where not exists (select 1 from scores as t where s.user_primary_key" \
+               + " = t.user_primary_key and s.created_at < t.created_at )" \
+               + f" order by {sort_key} {'ASC' if ascending else 'DESC'}"
     results = db.session.execute(sql_text)
     score_table = list(map(dict, results.fetchall()))
 
@@ -133,28 +133,31 @@ def visualize():
     focus_id = request.args.get("id")
     columns = ['users.user_id', 'print_name', 'created_at', 'comment', sort_key]
     sql_text = f"select {', '.join(columns)} from scores as s" \
-        + " inner join users on s.user_primary_key = users.id " \
-        + " order by created_at DESC"
+               + " inner join users on s.user_primary_key = users.id " \
+               + " order by created_at DESC"
     results = db.session.execute(sql_text)
     df_all = pd.DataFrame(list(map(dict, results.fetchall())))
     fig = go.Figure(layout_yaxis_range=[0, 1])
-    for group_name, df in df_all.groupby("print_name"):
-        if group_name == "YANSハッカソン運営委員":
-            row = df.iloc[0]
-            fig.add_hline(
-                y=row[sort_key], annotation_text=row.comment,
-                line=dict(width=1, dash="dot"), annotation_position="bottom left"
-            )
-        else:
-            fig.add_scatter(
-                x=df.created_at.values, y=df[sort_key].values,
-                text=df.comment,
-                visible=True if (focus_id is None) or (df["user_id"].iloc[0] == focus_id) else 'legendonly',
-                name=group_name, mode="lines+markers",
-                line=dict(
-                    width=1,
+
+    if len(df_all) > 0:
+        for group_name, df in df_all.groupby("print_name"):
+            if group_name == "YANSハッカソン運営委員":
+                row = df.iloc[0]
+                fig.add_hline(
+                    y=row[sort_key], annotation_text=row.comment,
+                    line=dict(width=1, dash="dot"), annotation_position="bottom left"
                 )
-            )
+            else:
+                fig.add_scatter(
+                    x=df.created_at.values, y=df[sort_key].values,
+                    text=df.comment,
+                    visible=True if (focus_id is None) or (df["user_id"].iloc[0] == focus_id) else 'legendonly',
+                    name=group_name, mode="lines+markers",
+                    line=dict(
+                        width=1,
+                    )
+                )
+
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return render_template('history.html', graphJSON=graphJSON)
 
