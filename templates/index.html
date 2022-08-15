@@ -128,6 +128,11 @@
         </div>
       </form>
       {% endif %}
+      <div class="row center">
+        <a href="{{ url_for('visualize') }}" style="display: inline-flex; align-items: center;" data-lity>
+          スコア変遷<i class="material-icons">trending_up</i>
+        </a>
+      </div>
       <div class="row scroll-table">
         <div class="col l10 offset-l1 s12">
           <table id="score_board" class="highlight centered">
