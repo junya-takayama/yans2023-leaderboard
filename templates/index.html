@@ -144,9 +144,9 @@
                 <th style="min-width: 300px;">チーム</th>
                 <th style="padding-right: 20px;">提出回数</th>
                 {% for var_name, metric_name in metrics_name_dict.items() %}
-                  <th style="padding-right: 20px;">{{ metric_name }}</th>
+                  <th style="padding-right: 20px;">{{ metric_name }} (最新)</th>
                 {% endfor %}
-                <th style="padding-right: 20px;">{{ sort_key }} (最良)</th>
+                <th style="padding-right: 20px;">{{ metrics_name_dict[sort_key] }} (最良)</th>
               </tr>
             </thead>
             <tbody>

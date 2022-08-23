@@ -115,10 +115,10 @@ def index():
     columns = [
                   'users.user_id', 'print_name', 'created_at', 'comment', 'n_submit', sort_key + '_max'
               ] + list(metrics_name_dict.keys())
-    ascending = False
+    ascending = Score.ascending
     sql_text = f"""
         with max_scores as (
-            select 
+            select distinct
                 {sort_key} as {sort_key}_max, 
                 user_primary_key
             from scores
@@ -153,9 +153,11 @@ def visualize():
     sort_key = Score.sort_key
     focus_id = request.args.get("id")
     columns = ['users.user_id', 'print_name', 'created_at', 'comment', sort_key]
-    sql_text = f"select {', '.join(columns)} from scores as s" \
-               + " inner join users on s.user_primary_key = users.id " \
-               + " order by created_at DESC"
+    sql_text = f"""
+        select {', '.join(columns)} from scores as s
+        inner join users on s.user_primary_key = users.id
+        order by created_at DESC
+        """
     results = db.session.execute(sql_text)
     df_all = pd.DataFrame(list(map(dict, results.fetchall())))
     fig = go.Figure(layout_yaxis_range=[0, 1])
