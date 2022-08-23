@@ -113,13 +113,13 @@ def index():
     metrics_name_dict = Score.metrics_name_dict
     sort_key = Score.sort_key
     columns = [
-                  'users.user_id', 'print_name', 'created_at', 'comment', 'n_submit', sort_key + '_max'
+                  'users.user_id', 'print_name', 'created_at', 'comment', 'n_submit', sort_key + '_best'
               ] + list(metrics_name_dict.keys())
     ascending = Score.ascending
     sql_text = f"""
         with max_scores as (
             select distinct
-                {sort_key} as {sort_key}_max, 
+                {sort_key} as {sort_key}_best, 
                 user_primary_key
             from scores
             inner join users on scores.user_primary_key = users.id
