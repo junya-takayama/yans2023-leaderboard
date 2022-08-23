@@ -112,13 +112,34 @@ def index():
     upload_form = UploadForm()
     metrics_name_dict = Score.metrics_name_dict
     sort_key = Score.sort_key
-    columns = ['users.user_id', 'print_name', 'created_at', 'comment'] + list(metrics_name_dict.keys()) + ['n_submit']
-    ascending = False
-    sql_text = f"select {', '.join(columns)} from scores as s" \
-               + " inner join users on s.user_primary_key = users.id " \
-               + " where not exists (select 1 from scores as t where s.user_primary_key" \
-               + " = t.user_primary_key and s.created_at < t.created_at )" \
-               + f" order by {sort_key} {'ASC' if ascending else 'DESC'}"
+    columns = [
+                  'users.user_id', 'print_name', 'created_at', 'comment', 'n_submit', sort_key + '_best'
+              ] + list(metrics_name_dict.keys())
+    ascending = Score.ascending
+    sql_text = f"""
+        with max_scores as (
+            select distinct
+                {sort_key} as {sort_key}_best, 
+                user_primary_key
+            from scores
+            inner join users on scores.user_primary_key = users.id
+            where not exists (
+                select 1 from scores as t 
+                where
+                    scores.user_primary_key = t.user_primary_key and
+                    scores.{sort_key} {">" if ascending else "<"} t.{sort_key}
+            )
+        )
+        select {', '.join(columns)} from scores as s
+        inner join users on s.user_primary_key = users.id 
+        inner join max_scores on s.user_primary_key = max_scores.user_primary_key
+        where not exists (
+            select 1 from scores as t 
+            where
+                s.user_primary_key = t.user_primary_key and
+                s.created_at < t.created_at
+        )
+        order by {sort_key} {'ASC' if ascending else 'DESC'}"""
     results = db.session.execute(sql_text)
     score_table = list(map(dict, results.fetchall()))
 
@@ -132,9 +153,11 @@ def visualize():
     sort_key = Score.sort_key
     focus_id = request.args.get("id")
     columns = ['users.user_id', 'print_name', 'created_at', 'comment', sort_key]
-    sql_text = f"select {', '.join(columns)} from scores as s" \
-               + " inner join users on s.user_primary_key = users.id " \
-               + " order by created_at DESC"
+    sql_text = f"""
+        select {', '.join(columns)} from scores as s
+        inner join users on s.user_primary_key = users.id
+        order by created_at DESC
+        """
     results = db.session.execute(sql_text)
     df_all = pd.DataFrame(list(map(dict, results.fetchall())))
     fig = go.Figure(layout_yaxis_range=[0, 1])

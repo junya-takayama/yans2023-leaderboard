@@ -57,6 +57,8 @@ class Score(db.Model):
 
     # ソートに用いる（最終評価に用いる）評価指標を変数名で指定
     sort_key = "ndcg"
+    # ソートを昇順で行いたい場合は True にしておく
+    ascending = False
 
     def __init__(self, result_dict):
         self.user_primary_key = result_dict['user_primary_key']
