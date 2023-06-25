@@ -48,15 +48,21 @@ class Score(db.Model):
     user = db.relationship("User")
 
     # 複数の評価指標を表示したい場合以下に適宜追加
-    ndcg = db.Column(db.Float, nullable=False)
+    bleu = db.Column(db.Float, nullable=False)
+    rouge = db.Column(db.Float, nullable=False)
+    kwd = db.Column(db.Float, nullable=False)
+    overall = db.Column(db.Float, nullable=False)
 
     # 各評価指標の変数名と表示名のマッピング。
     metrics_name_dict = {
-        "ndcg": "nDCG@5",
+        "bleu": "BLEU-4",
+        "rouge": "Rouge-1",
+        "kwd": "Kwd",
+        "overall": "Overall"
     }
 
     # ソートに用いる（最終評価に用いる）評価指標を変数名で指定
-    sort_key = "ndcg"
+    sort_key = "Overall"
     # ソートを昇順で行いたい場合は True にしておく
     ascending = False
 

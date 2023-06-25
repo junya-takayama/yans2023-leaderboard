@@ -13,7 +13,7 @@ import json
 import os
 import pandas as pd
 from model import db, Score, User
-from calc_score import calc_ndcg, convert_to_submit_format
+from calc_score import calc_scores, DataMismatchError
 
 try:
     from local_settings import SECRET_KEY
@@ -192,22 +192,23 @@ def upload_and_evaluate():
     submission_data = upload_form.submission_file.data
 
     try:
-        df_true = pd.read_json(os.path.join(base_dir + "/data/leader_board.jsonl"), orient="records", lines=True)
+        df_true = pd.read_csv(os.path.join(base_dir + "/data/leader_board.csv"))
     except:
         flash("正解データの読み込みに失敗しました。お手数ですが運営委員までご連絡ください。", "failed")
         return redirect(url_for('index'))
 
     try:
-        df_pred = pd.read_json(submission_data, orient="records", lines=True)
-        df_true = df_true[df_true["sets"] == "leader_board-private"]
-        df_true = convert_to_submit_format(df_true, "helpful_votes", "true")
-        print(calc_ndcg(df_true, df_pred))
+        df_pred = pd.read_csv(submission_data)
+        score_dict = calc_scores(df_true, df_pred)
+        print(score_dict)
         result = {
-            "ndcg": calc_ndcg(df_true, df_pred)["ndcg@5"],
             "user_primary_key": current_user.id,
             "comment": str(description),
         }
+        result.update(score_dict)
         score_record = Score(result)
+    except DataMismatchError as e:
+        flash(e.args[0])
     except:
         flash("評価スクリプトが異常終了しました。提出ファイルのフォーマット等を見直してください。", "failed")
         return redirect(url_for('index'))
