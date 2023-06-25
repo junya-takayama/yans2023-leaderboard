@@ -209,6 +209,7 @@ def upload_and_evaluate():
         score_record = Score(result)
     except DataMismatchError as e:
         flash(e.args[0])
+        return redirect(url_for('index'))
     except:
         flash("評価スクリプトが異常終了しました。提出ファイルのフォーマット等を見直してください。", "failed")
         return redirect(url_for('index'))
