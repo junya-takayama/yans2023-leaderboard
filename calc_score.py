@@ -81,7 +81,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pred_file", type=str, default="./submit/submit_leader_board.csv")
-    parser.add_argument("--true_file", type=str, default="./dataset_private/leader_board.csv")
+    parser.add_argument("--pred-file", type=str, default="./submit/submit_leader_board.csv")
+    parser.add_argument("--true-file", type=str, default="./dataset_private/leader_board.csv")
     args = parser.parse_args()
     main(args)
