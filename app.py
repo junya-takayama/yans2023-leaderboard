@@ -32,6 +32,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{host}/{name}'.format(**{
     'host': base_dir,
     'name': 'db.sqlite3'
 })
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['FLASK_ADMIN_SWATCH'] = 'United'
 db.init_app(app)
 migrate = Migrate(app, db)

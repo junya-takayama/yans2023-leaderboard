@@ -66,10 +66,10 @@ def calc_scores(df_true: pd.DataFrame, df_pred: pd.DataFrame) -> dict[str, float
     hmean_score = 3 / (1 / bleu_score + 1 / rouge_score + 1 / kwd_score)
 
     return {
-        "BLEU-4": _calc_bleu(df),
-        "Rouge-1": _calc_rouge(df),
-        "Kwd": _calc_kwd(df),
-        "Overall": hmean_score
+        "bleu": _calc_bleu(df),
+        "rouge": _calc_rouge(df),
+        "kwd": _calc_kwd(df),
+        "overall": hmean_score
     }
 
 
