@@ -5,6 +5,7 @@ import argparse
 import pandas as pd
 import sacrebleu
 import MeCab
+import ipadic
 from rouge_score import rouge_scorer
 from rouge_score.tokenizers import Tokenizer
 
@@ -15,7 +16,7 @@ class DataMismatchError(Exception):
 
 class MeCabTokenizer(Tokenizer):
     def tokenize(self, text: str) -> str:
-        m = MeCab.Tagger("-Owakati")
+        m = MeCab.Tagger(ipadic.MECAB_ARGS + " -Owakati")
         return m.parse(text).strip()
 
 
