@@ -62,7 +62,7 @@ class Score(db.Model):
     }
 
     # ソートに用いる（最終評価に用いる）評価指標を変数名で指定
-    sort_key = "Overall"
+    sort_key = "overall"
     # ソートを昇順で行いたい場合は True にしておく
     ascending = False
 
