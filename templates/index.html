@@ -58,7 +58,7 @@
   <body>
     <div style="min-height: 100vh; position: relative; padding-bottom: 60px; box-sizing: border-box; padding-top:100px;">
       <nav class="nav-wrapper light-green darken-3" style="position: fixed; top:0px; z-index:9999;">
-        <a class="brand-logo center" href="https://yans.anlp.jp/entry/yans2022hackathon">YANS2022 Leaderboard</a>
+        <a class="brand-logo center" href="https://yans.anlp.jp/entry/yans2023hackathon">YANS2023 Leaderboard</a>
         {% if current_user.is_authenticated %}
         <ul id="nav-mobile" class="right hide-on-med-and-down">
           <li>{{ current_user.user_id }} でログイン中</li>
@@ -129,7 +129,7 @@
       </form>
       {% endif %}
       <div class="row center">
-        <a href="https://yans.anlp.jp/entry/yans2022hackathon" style="display: inline-flex; align-items: center;">
+        <a href="https://docs.google.com/presentation/d/1RtOVJ0mwmB-OUIP6WXDTsslDJWOjGDT_CMFxlw1tmuk/edit?usp=sharing" style="display: inline-flex; align-items: center;">
           タスク説明<i class="material-icons">notes</i>
         </a> | <a href="{{ url_for('visualize') }}" style="display: inline-flex; align-items: center;" data-lity>
           スコア推移<i class="material-icons">trending_up</i>
